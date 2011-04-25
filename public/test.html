@@ -1,0 +1,62 @@
+<html>
+	<head>
+		<title>ok hi</title>
+		<link rel="stylesheet" href="i.css" type="text/css" media="screen" /> 
+		<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.5.2.min.js" type="text/javascript"></script>
+		<script src="plist.js" type="text/javascript"></script>
+		<script src="sql.js" type="text/javascript"></script>
+	</head>
+		<div id="selector">
+			<input type="file" webkitdirectory directory multiple mozdirectory id="fileselector"> 
+			<div id="drop_zone" style="height: 200px; width: 100%; border: 4px #ddd dashed;">Drop files here</div>
+		</div>
+		<ul id="list"></ul>
+	<body>
+		
+	<script type="text/javascript">
+	
+	$.strPad = function(i,l,s) {
+		var o = i.toString();
+		if (!s) { s = '0'; }
+		while (o.length < l) {
+			o = s + o;
+		}
+		return o;
+	};
+	
+	SQR = new Sqlite3Reader();
+	
+	$('#fileselector').change(function(e) {
+		i = this.files;
+		handleFileSelect(i)
+	});
+	
+	$(document).bind('sqlready', function(e) {
+		console.log('YEAH')
+		console.log(SQR.tables)
+	})
+	
+	function handleFileSelect(input) {
+	    var files = []
+	    for(var i = 0, f; f = input[i]; i++) {
+	        files[f.name] = f;
+		}
+	    if(("Manifest.mbdb" in files) && ("Manifest.mbdx" in files)) {
+	        lilog('manifest found')
+	        var mbdb = new FileReader();
+	        mbdb.onload = load_mbdb(mbdb, files);
+			mbdb.onerror = function(e) { alert(e) }
+	        mbdb.readAsBinaryString(files["Manifest.mbdb"]);
+	    } else {
+	    	lilog('no manifest found!');
+	    }
+	}
+	
+
+	
+	function lilog(t) {
+		$('#list').append($('<li />', {text: t}));
+	}
+	</script>
+	</body>
+</html>
