@@ -8,7 +8,7 @@ function Sqlite3Reader() {
 	
 	this.loadfile = function(reader) {
 		var that = this;
-		console.log('what is this')
+		//console.log('what is this')
 		return function(e) {
 	        that.file = new Parser(reader.result);
 	        var magic = that.file.bytes(15);
@@ -19,7 +19,7 @@ function Sqlite3Reader() {
 			pagesize = that.page_size;
 			that.rootnode = new Sqlite3BTree(that.file);
 			MASTER = new Sqlite3Table(that.rootnode, true);
-			console.log('sqlite_master loaded')
+			//console.log('sqlite_master loaded')
 			that.tables = [];
 			$.each(MASTER.rows(), function(i, schema) {
 				var r = {
@@ -52,8 +52,8 @@ function Sqlite3Reader() {
 		var data = [];
 		$.map(tbl.rows(), function(r) {
 			row = $.map(r.columns, function(col) { return read_column(col, r.payload) })
-			//console.log('new row')
-			console.log(row)
+			////console.log('new row')
+			//console.log(row)
 			data.push(row)
 			return row
 		});
@@ -84,33 +84,39 @@ function Sqlite3Reader() {
 	
 	function Sqlite3ITable(_node, root) {
 		lilog("starting inner table");
+		that = this;
 		var isRoot = root;
 		var node = _node;
-		var file = _node.file;
-		this.pos = file.pos();
+		this.file = _node.file;
+		this.pos = this.file.pos();
 		var header = node.header;
 		var cells = node.cells;
 		
 		this.read_children = function() {
 			var kids = [];
 			var pages = [];
-			pages.push(header['rightmost']);
+			//console.log('VV header VV')
+			//console.log(cells)
+			if(header['rightmost'] != null) {  pages.push(header['rightmost']) } 
 			$.each(cells, function(i, value) {
-				if(isRoot) { file.seek(value) }else{ file.seek(value + this.pos) }
-				//lilog('cell ' + value + ' @ ' + file.pos() + ' // ' + this.pos);
-				var page_number = file.get_int(4) - 1;
-				console.log('page: ' + page_number)
-				int_key = file.varint(); // need to impliment varint asap;
+
+				if(isRoot) { that.file.seek(value) }else{ that.file.seek(value + that.pos) }
+				//console.log('cell ' + value + ' @ ' + that.file.pos() + ' // ' + that.pos);
+				var page_number = that.file.get_int(4) - 1;
+				//console.log('page found: ' + page_number)
+				int_key = that.file.varint(); // need to impliment varint asap;
+				//console.log('key number: ' + int_key)
 				pages.push(page_number)
+				//console.log(pages)
 				//lilog('^^ points to page ' + page_number);
-				file.seek(this.pos)
+				that.file.seek(that.pos)
 			});
 			
 			$.each(pages.sort().reverse(), function(i, page) {
-				file.seek(page_size * page);
-				console.log('seeked to ' + file.pos() + ' for page ' + page)
-				var tree = new Sqlite3BTree(file);
-				file.seek(page_size * page);
+				that.file.seek(page_size * page);
+				//console.log('reading child tree @ ' + that.file.pos() + '// page: ' + page)
+				var tree = new Sqlite3BTree(that.file);
+				that.file.seek(page_size * page);
 				var table = new Sqlite3LTable(tree)
 				kids.push(table)
 			});
@@ -132,7 +138,7 @@ function Sqlite3Reader() {
 	}
 	
 	function Sqlite3LTable(_node, root) {
-		console.log("starting leaf table");
+		//console.log("starting leaf table");
 		var that = this;
 		that.isRoot = root;
 		var node = _node;
@@ -140,10 +146,9 @@ function Sqlite3Reader() {
 		this.pos = that.file.pos();
 		this.header = node.header;
 		var cells = _node.cells.sort();
-		console.log(cells.sort());
 		
 		this.rows = function() {
-			console.log(cells.sort())
+			
 			var _internal = []
 			$.each(cells, function(i, value) {
 				if(that.root) { that.file.seek(value) }else{ that.file.seek(value + that.pos) }
@@ -172,7 +177,7 @@ function Sqlite3Reader() {
 		}
 		//this.columns = this.columns.reverse();
 		this.payload = new Parser(file.bytes(payload_length - header_length));
-		//console.log('length: ' + this.payload.length)
+		////console.log('length: ' + this.payload.length)
 	}
 
 
@@ -183,15 +188,14 @@ function Sqlite3Reader() {
 		this.startpos = this.file.pos();
 		
 		this.parse_header = function() {
-			console.log('parsing at ' + this.file.pos())
+			//console.log('parsing btree at ' + this.file.pos())
 			
 			type = this.file.get_int(1);
 			ffree = this.file.get_int(2);
 			cells = this.file.get_int(2);
-			console.log(cells)
 			content = this.file.get_int(2);
 			this.file.skip(1); 
-			rightmost = -1;
+			rightmost = null;
 			if(type==5) {
 				rightmost = this.file.get_int(4) - 1;
 			}
@@ -201,17 +205,13 @@ function Sqlite3Reader() {
 		
 		this.parse_cells = function() {
 			cells = [];
-			console.log('looking for ' + this.header['cells'] + ' cells')
 			for(i = 0; i < this.header['cells']; i++) {
 				cells.push(this.file.get_int(2));
 			}
-			console.log('parsed cells')
-			console.log(cells)
 			return cells;
 		}
 		
 		this.header = this.parse_header();
-		console.log(this.header)
 		this.cells = this.parse_cells();
 	}
 }
