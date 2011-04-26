@@ -1,3 +1,5 @@
+/** There are, naturally, dragons below. **/
+
 function Sqlite3Reader() {
 	this.file = null;
 	this.pagesize = 0;
@@ -18,8 +20,10 @@ function Sqlite3Reader() {
 	        that.header();
 			pagesize = that.page_size;
 			that.rootnode = new Sqlite3BTree(that.file);
+			lilog('root node read')
 			MASTER = new Sqlite3Table(that.rootnode, true);
-			//console.log('sqlite_master loaded')
+			lilog('sqlite_master loaded')
+			
 			that.tables = [];
 			$.each(MASTER.rows(), function(i, schema) {
 				var r = {
@@ -34,6 +38,7 @@ function Sqlite3Reader() {
 					that.table_lookup[r.name] = r;
 				}
 			});
+			
 			$(document).trigger('sqlready');
 	    }
 	}
@@ -63,7 +68,7 @@ function Sqlite3Reader() {
 	this.header = function() {
 		// we only care about the page_size for this right now.
 		page_size = this.page_size = this.file.get_int(2); // global whatuuupppp
-        lilog(this.page_size);
+        lilog('page size: ' + this.page_size);
 		this.file.seek(100);
 	};
 	
@@ -114,7 +119,7 @@ function Sqlite3Reader() {
 			
 			$.each(pages.sort().reverse(), function(i, page) {
 				that.file.seek(page_size * page);
-				//console.log('reading child tree @ ' + that.file.pos() + '// page: ' + page)
+				//lilog('reading child tree @ ' + that.file.pos() + '// page: ' + page)
 				var tree = new Sqlite3BTree(that.file);
 				that.file.seek(page_size * page);
 				var table = new Sqlite3LTable(tree)
@@ -138,7 +143,7 @@ function Sqlite3Reader() {
 	}
 	
 	function Sqlite3LTable(_node, root) {
-		//console.log("starting leaf table");
+		//lilog("starting leaf table");
 		var that = this;
 		that.isRoot = root;
 		var node = _node;
@@ -177,7 +182,7 @@ function Sqlite3Reader() {
 		}
 		//this.columns = this.columns.reverse();
 		this.payload = new Parser(file.bytes(payload_length - header_length));
-		////console.log('length: ' + this.payload.length)
+		//console.log('length: ' + this.payload.length)
 	}
 
 
@@ -188,7 +193,7 @@ function Sqlite3Reader() {
 		this.startpos = this.file.pos();
 		
 		this.parse_header = function() {
-			//console.log('parsing btree at ' + this.file.pos())
+			//lilog('parsing btree at ' + this.file.pos())
 			
 			type = this.file.get_int(1);
 			ffree = this.file.get_int(2);
