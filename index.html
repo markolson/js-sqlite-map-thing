@@ -138,7 +138,7 @@
 	        var db = new FileReader();
 	        db.onload = SQR.loadfile(db);
 	        db.onerror = function(e) { alert(e) }
-	        db.readAsBinaryString(file);
+	        db.readAsBinaryString(files["consolidated.db"]);
 	    } else if(("Manifest.mbdb" in files) && ("Manifest.mbdx" in files)) {
 	        lilog('manifest found')
 	        var mbdb = new FileReader();
