@@ -31,23 +31,25 @@
 			<span id="chrome">
 			<h3>Select your backup folder</h3><input type="file"  multiple="true" webkitdirectory directory multiple mozdirectory id="fileselector"> 
 			<p><ul>
-                <li>Mac: <em>/[User]/Library/Application Support/MobileSync/Backup/[NewestFolder]/</em></li>
-                <li>Windows: <em>Application Data\Apple Computer\MobileSync\Backup\[NewestFolder]</em></li>
+                <li>Mac: <em>/[User]/Library/Application Support/MobileSync/Backup/[Newest Folder]/</em></li>
+                <li>Windows: <em>[User]\Application Data\Apple Computer\MobileSync\Backup\[Newest Folder]</em></li>
  			</ul>
 			</span>
 			<p>You can also drag&drop a consolidated.db file anywhere on here, if you have it.</p>
-			<b>No data is sent to any server, anywhere. All data remains on your computer.</b>
+			<b>No data is sent to any server, anywhere. All data remains on your computer</b>
 	</div>
 	<div class="box" style="display: none;" id="wait">This should take, at most, a few seconds. If it takes longer than that, it didn't work for some reason or another. Check out the <a href="https://github.com/markolson/js-sqlite-map-thing/issues">issues on github</a> and see if it's a known problem with your osx/browser/technique.</div>
 	</div>
 	<div id="footer"><a href="https://github.com/markolson">@mark_olson</a> & <a href="https://github.com/williame">William Edwards</a>
+		&dash; <a href="http://markolson.github.com/js-sqlite-map-thing/">code on github</a>
 		&dash; <b>All data remains on your computer.</b>
+		&dash; <b>Works best with Chrome.</b>
 	</div>
 	
 	<script type="text/javascript">	
 	$(function(){ 
 		if (window.File && window.FileReader && window.FileList && window.Blob) { } else {
-		 alert("I don't think your browser is cool enough for this to work. Try Chrome or a newish Firefox. You're still free to try, though");
+		 alert("This probably won't work for you (try chrome), but you're still free to try.");
 		}
 		
 	   var latlng = new google.maps.LatLng(50, -50);
