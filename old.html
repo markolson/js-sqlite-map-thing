@@ -1,0 +1,158 @@
+<html>
+	<head>
+		<title>Plot your iPhone tracking data on Google maps</title>
+		<link rel="stylesheet" href="i.css" type="text/css" media="screen" /> 
+		<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.5.2.min.js" type="text/javascript"></script>
+		<script src="plist.js" type="text/javascript"></script>
+		<script src="sql.js" type="text/javascript"></script>
+		<script src="pack.js" type="text/javascript"></script>
+		 <script src="http://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
+		<script type="text/javascript">
+
+		  var _gaq = _gaq || [];
+		  _gaq.push(['_setAccount', 'UA-22971528-1']);
+		  _gaq.push(['_trackPageview']);
+
+		  (function() {
+		    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+		    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		  })();
+
+		</script>
+	</head>
+	<body style="font-family: sans serif;">
+	    <div id="selector" style="padding: 10px; margin: 10px; border: 4px #ddd dashed;">
+			<p>Choose the folder with your iPhone backups: <input type="file"  multiple="true" webkitdirectory directory multiple mozdirectory id="fileselector"> 
+			<p><ul>
+                <li>For Mac, the folders are in <em>Library/Application\ Support/MobileSync/Backup</em></li>
+                <li>and on Windows it will be <em>Application Data\Apple Computer\MobileSync\Backup</em></li>
+                <li>If you have a jailbroken iPhone and don't have backups, you can <em>scp</em> your <em>consolidated.db</em> and drop that</li>
+			</ul>
+			<p>You can also drag-n-drop all the <i>files</i> in one of your iPhone backups folder onto this page!
+			</div>
+		</div>
+		<em><a href="https://github.com/markolson/js-sqlite-map-thing/tree/gh-pages">Sourcecode</a> by <em><a href="https://github.com/markolson">Mark Olson</a> &amp; <a href="https://github.com/williame">William Edwards</a></em>
+		<blink id="wait" style="color: red;"><b>please wait...</b></blink><br/>
+	    <table height="100%" width="100%">
+		<tr><td><div id="map_canvas" style="width:100%; height:100%;"/>
+            <!-- (MCC INTEGER, MNC INTEGER, LAC INTEGER, CI INTEGER, Timestamp FLOAT, Latitude FLOAT, Longitude FLOAT, HorizontalAccuracy FLOAT, Altitude FLOAT, VerticalAccuracy FLOAT, Speed FLOAT, Course FLOAT, Confidence INTEGER 
+            <table>
+                <thead>
+                    <tr>
+                        <th>MCC</th><th>MNC</th><th>LAC</th><th>CI</th><th>Timestamp</th>
+                        <th>Latitude</th><th>Longitude</th><th>HorizontalAccuracy</th>
+                        <th>Altitude</th><th>VerticalAccuracy</th>
+                        <th>Course</th><th>Confidence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                
+                </tbody>
+            </table>-->
+        </tr></table>
+		
+	<script type="text/javascript">
+	$(function(){ 
+	   var latlng = new google.maps.LatLng(50, -50);
+	    var myOptions = {
+	      zoom: 3,
+	      center: latlng,
+	      mapTypeId: google.maps.MapTypeId.ROADMAP
+	    };
+	    GOOG_map = new google.maps.Map(document.getElementById('map_canvas'), myOptions);
+	    $('#wait').hide();
+	})
+	
+	$.strPad = function(i,l,s) {
+		var o = i.toString();
+		if (!s) { s = '0'; }
+		while (o.length < l) {
+			o = s + o;
+		}
+		return o;
+	};
+	
+	SQR = new Sqlite3Reader();
+	PACK = new JSPack();
+	
+	$('#fileselector').change(function(e) {
+		i = this.files;
+		handleFileSelect(i);
+	});
+	
+	$(document).bind('sqlready', function(e) {
+		$('#selector').hide();
+		$('#map_canvas').show();		
+		lilog('sql ready')
+		data = SQR.read_table('CellLocation');
+		
+		var latlngbounds = new google.maps.LatLngBounds( );
+		$.each(data, function(i,row) { 
+			if(row[5] < 0.01 && row[5] > -0.01 && row[6] < 0.01 && row[6] < 0.01) { lilog('skipping 0,0'); return }
+			var myLatLng = new google.maps.LatLng(row[5], row[6]);
+			latlngbounds.extend( myLatLng );
+			var image = 'beachflag.png';
+			var beachMarker = new google.maps.Marker({
+		      position: myLatLng,
+		      map: GOOG_map
+		  });
+		
+			//console.log(row)
+			//var cells = $.map(row, function(cell) { return '<td>' + cell + '</td>' }).join('');
+			
+			//var r = $('<tr>').html(cells);
+			//$('tbody').append(r)
+
+		})
+		lilog('centering')
+		GOOG_map.fitBounds (latlngbounds);
+		$('#wait').hide();
+	})
+	
+	function handleFileDrop(evt) {
+	    evt.stopPropagation();
+	    evt.preventDefault();
+	    $('#wait').show();
+	    var files = evt.dataTransfer.files; // FileList object.
+	    handleFileSelect(files);
+	}
+	
+	function handleDragOver(evt) {
+		evt.stopPropagation();
+		evt.preventDefault();		
+	}
+		
+	var dropZone = document; //.getElementById('drop_zone');
+	dropZone.addEventListener('dragover', handleDragOver, false);
+ 	dropZone.addEventListener('drop', handleFileDrop, false);
+	
+	function handleFileSelect(input) {
+	    var files = [];
+	    lilog('processing files...');
+	    for(var i = 0, f; f = input[i]; i++) {
+	        files[f.name] = f;
+	    }
+	    if("consolidated.db" in files) {
+	        lilog("consolidated.db found");
+	        var db = new FileReader();
+	        db.onload = SQR.loadfile(db);
+	        db.onerror = function(e) { alert(e) }
+	        db.readAsBinaryString(files["consolidated.db"]);
+	    } else if(("Manifest.mbdb" in files) && ("Manifest.mbdx" in files)) {
+	        lilog('manifest found')
+	        var mbdb = new FileReader();
+	        mbdb.onload = load_mbdb(mbdb, files);
+	        mbdb.onerror = function(e) { alert(e) }
+	        mbdb.readAsBinaryString(files["Manifest.mbdb"]);
+	    } else {
+	        lilog('no manifest found!');
+	    }
+	}
+	
+	function lilog(t) {
+		//$('#list').append($('<li />', {text: t}));
+	}
+	</script>
+	</body>
+</html>
