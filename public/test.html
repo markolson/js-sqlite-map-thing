@@ -60,7 +60,7 @@
 	});
 	
 	$(document).bind('sqlready', function(e) {
-		data = SQR.read_table('CellLocationLocal');
+		data = SQR.read_table('CellLocation');
 		$.each(data, function(i,row) { 
 			var myLatLng = new google.maps.LatLng(row[5], row[6]);
 			var image = 'beachflag.png';
@@ -69,10 +69,10 @@
 		      map: GOOG_map
 		  });
 			//console.log(row)
-			var cells = $.map(row, function(cell) { return '<td>' + cell + '</td>' }).join('');
+			//var cells = $.map(row, function(cell) { return '<td>' + cell + '</td>' }).join('');
 			
-			var r = $('<tr>').html(cells);
-			$('tbody').append(r)
+			//var r = $('<tr>').html(cells);
+			//$('tbody').append(r)
 
 		})
 	})
