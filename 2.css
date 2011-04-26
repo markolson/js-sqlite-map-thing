@@ -1,0 +1,73 @@
+td {
+	font-size: 0.8em;
+}
+body {
+	font-family: sans-serif;
+	margin: 0px;
+	padding: 0px;
+}
+#airlock {
+	width: 100%;
+	height: 100%;
+}
+
+.o {
+	
+	background-color: #000;
+	filter:alpha(opacity=25);
+	-moz-opacity: 0.25;
+	opacity: 0.25;
+}
+a { 
+	color: #000;
+	text-decoration: underline;
+}
+
+#map_canvas { 
+	width: 100%;
+	height: 100%;
+}
+
+#infos {
+	margin-top: 20%;
+	margin-left: 20%;
+	margin-right: 20%;
+	
+	width: 60%;
+	z-index: 100;
+	position: fixed;
+	padding: 10px;
+	top: 0px;
+	left: 0px;
+}
+
+.box { 
+	background-color: #efefef;
+	border: 3px solid #fff;
+	-moz-border-radius: 15px;
+	border-radius: 15px;
+	color: #000;
+	
+}
+
+#instructions_and_stuff {
+	height: 30%;
+}
+#wait { 
+	padding: 5px;
+}
+
+#footer {
+	background-color: #000;
+	font-size: 0.8em;
+	position: fixed;
+    height: 20px;
+	padding: 3px;
+    width: 100%;
+    bottom: 0;
+	color: #efefef;
+}
+
+#footer a { 
+	color: #fff;
+}
