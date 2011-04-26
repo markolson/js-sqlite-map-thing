@@ -114,7 +114,7 @@ function load_mbdx(reader,files,target) {
                 fileID += hex;
             }
             if(target == data.get_int(4)+6) {
-                lilog(fileID);
+                lilog('location db is in '+fileID);
                 file = files[fileID];
                 break;
             }
@@ -124,8 +124,9 @@ function load_mbdx(reader,files,target) {
             throw "Cannot resolve Library/Caches/locationd/consolidated.db";
         db = new FileReader();
         db.onload = SQR.loadfile(db);
-		db.onerror = function(e) { alert(e) }
+        db.onerror = function(e) { alert(e) }
         db.readAsBinaryString(file);
+        lilog('extracting location info; please wait...')
     }
 }
 
@@ -155,7 +156,7 @@ function load_mbdb(reader,files) {
             throw "Library/Caches/locationd/consolidated.db is not in index"
         var mbdx = new FileReader();
         mbdx.onloadend = load_mbdx(mbdx,files,locationd);
-		mbdx.onerror = function(e) { alert(e) }
+        mbdx.onerror = function(e) { alert(e) }
         mbdx.readAsBinaryString(files["Manifest.mbdx"]);
     }
 }
