@@ -5,11 +5,26 @@
 		<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.5.2.min.js" type="text/javascript"></script>
 		<script src="plist.js" type="text/javascript"></script>
 		<script src="sql.js" type="text/javascript"></script>
+		<script src="pack.js" type="text/javascript"></script>
 	</head>
 		<div id="selector">
 			<input type="file" webkitdirectory directory multiple mozdirectory id="fileselector"> 
 			<div id="drop_zone" style="height: 200px; width: 100%; border: 4px #ddd dashed;">Drop files here</div>
 		</div>
+		<!-- (MCC INTEGER, MNC INTEGER, LAC INTEGER, CI INTEGER, Timestamp FLOAT, Latitude FLOAT, Longitude FLOAT, HorizontalAccuracy FLOAT, Altitude FLOAT, VerticalAccuracy FLOAT, Speed FLOAT, Course FLOAT, Confidence INTEGER -->
+		<table>
+			<thead>
+				<tr>
+					<th>MCC</th><th>MNC</th><th>LAC</th><th>CI</th><th>Timestamp</th>
+					<th>Latitude</th><th>Longitude</th><th>HorizontalAccuracy</th>
+					<th>Altitude</th><th>VerticalAccuracy</th>
+					<th>Course</th><th>Confidence</th>
+				</tr>
+			</thead>
+			<tbody>
+			
+			</tbody>
+		</table>
 		<ul id="list"></ul>
 	<body>
 		
@@ -32,9 +47,34 @@
 	});
 	
 	$(document).bind('sqlready', function(e) {
-		//console.log('YEAH')
-		//console.log(SQR.tables)
+		data = SQR.read_table('CellLocationLocal');
+		$.each(data, function(i,row) { 
+			//console.log(row)
+			var cells = $.map(row, function(cell) { return '<td>' + cell + '</td>' }).join('');
+			
+			var r = $('<tr>').html(cells);
+			$('tbody').append(r)
+
+		})
 	})
+	
+	function handleFileDrop(evt) {
+	    evt.stopPropagation();
+	    evt.preventDefault();
+
+	    var files = evt.dataTransfer.files; // FileList object.
+		console.log(files)
+		handleFileSelect(files);
+	  }
+	
+	
+	function handleDragOver(evt) {
+		evt.stopPropagation();
+		evt.preventDefault();
+	}
+	var dropZone = document.getElementById('drop_zone');
+	dropZone.addEventListener('dragover', handleDragOver, false);
+ 	dropZone.addEventListener('drop', handleFileDrop, false);
 	
 	function handleFileSelect(input) {
 	    var files = []

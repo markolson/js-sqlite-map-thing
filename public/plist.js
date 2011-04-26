@@ -66,7 +66,7 @@ read_column = function(x, payload) {
 	if(x==1) { return payload.get_int(1) }
 	if(x==2) { return payload.get_int(2) }
 	if(x==4) { return payload.get_int(4) }
-	if(x==7) { return payload.get_int(8) }
+	if(x==7) { return payload.bytes(8) }
 	if(x > 11 && x%2==0) { return payload.bytes((x-12)/2) }
 	if(x > 12 && x%2==1) { return payload.bytes((x-13)/2) }
 }
