@@ -38,7 +38,6 @@ function Parser(data) {
 		value = this.bytes(size);
 		value = value.split('')
 		value = $.map(value, function(x) { return x.charCodeAt(0) })
-		console.log(value)
 		while(value.length < size) { 
 			value.push(0)
 		}
@@ -75,10 +74,12 @@ read_column = function(x, payload) {
 	if(x==0) { return '' }
 	if(x==1) { return payload.get_int(1) }
 	if(x==2) { return payload.get_int(2) }
+	if(x==3) { return payload.get_int(3) }
 	if(x==4) { return payload.get_int(4) }
 	if(x==7) { return PACK.Unpack('d', payload.octet(8), 0) }
 	if(x > 11 && x%2==0) { return payload.bytes((x-12)/2) }
 	if(x > 12 && x%2==1) { return payload.bytes((x-13)/2) }
+	console.log('unknown column of type ' + x)
 }
 
 function load_loc_db(reader) {
